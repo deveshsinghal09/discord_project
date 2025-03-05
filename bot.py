@@ -27,3 +27,10 @@ REMINDERS_FILE = "reminders.json"
 if not os.path.exists(REMINDERS_FILE):
     with open(REMINDERS_FILE, "w") as f:
         json.dump([], f)
+
+# Music queue
+MUSIC_QUEUE = []
+QUEUE_FILE = "queue.txt"
+if not os.path.exists(QUEUE_FILE):
+    with open(QUEUE_FILE, "w") as f:
+        f.write("")        
