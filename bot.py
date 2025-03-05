@@ -116,3 +116,14 @@ async def remind(ctx, time_str, *, reminder_text):
         await ctx.send(f"Reminder set for {remind_time.strftime('%Y-%m-%d %H:%M:%S')}")
     except ValueError:
         await ctx.send("Invalid time format. Use: !remind 5m <text>")
+
+# Music: Stop and disconnect
+@bot.command(name="stop")
+async def stop(ctx):
+    if ctx.voice_client:
+        MUSIC_QUEUE.clear()
+        ctx.voice_client.stop()
+        await ctx.voice_client.disconnect()
+        await ctx.send("Stopped and disconnected.")
+    else:
+        await ctx.send("Not in a voice channel!")        
