@@ -64,3 +64,55 @@ async def chat(ctx, *, message):
         await ctx.send(f"Error: {str(e)}")        
 
 
+@bot.command(name="summarize")
+async def summarize(ctx, *, message):
+    try:
+        prompt = f"Summarize this: {message}"
+        response = model.generate_content(prompt)
+        await ctx.send(f"Summary: {response.text[:2000]}")
+    except Exception as e:
+        await ctx.send(f"Error: {str(e)}")
+
+# Poll: Create a simple yes/no poll
+@bot.command(name="poll")
+async def poll(ctx, *, question):
+    embed = discord.Embed(title="Poll", description=question, color=discord.Color.blue())
+    message = await ctx.send(embed=embed)
+    await message.add_reaction("✅")
+    await message.add_reaction("❌")
+
+# Reminder: Set a reminder
+@bot.command(name="remind")
+async def remind(ctx, time_str, *, reminder_text):
+    try:
+        # Parse time (e.g., "5m" for 5 minutes, "2h" for 2 hours, "1d" for 1 day)
+        unit = time_str[-1].lower()
+        amount = int(time_str[:-1])
+        if unit == "m":
+            delta = timedelta(minutes=amount)
+        elif unit == "h":
+            delta = timedelta(hours=amount)
+        elif unit == "d":
+            delta = timedelta(days=amount)
+        else:
+            await ctx.send("Use format: !remind 5m <text> (m=minutes, h=hours, d=days)")
+            return
+
+        remind_time = datetime.now() + delta
+        reminder = {
+            "user_id": ctx.author.id,
+            "channel_id": ctx.channel.id,
+            "text": reminder_text,
+            "time": remind_time.isoformat()
+        }
+
+        # Save to file
+        with open(REMINDERS_FILE, "r") as f:
+            reminders = json.load(f)
+        reminders.append(reminder)
+        with open(REMINDERS_FILE, "w") as f:
+            json.dump(reminders, f)
+
+        await ctx.send(f"Reminder set for {remind_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    except ValueError:
+        await ctx.send("Invalid time format. Use: !remind 5m <text>")
